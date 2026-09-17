@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotina Diária</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F1EEF7;
+    --card-bg: #FFFFFF;
+    --text: #211F2B;
+    --text-muted: #746F82;
+    --line: #E6E1F0;
+    --shadow: rgba(33,31,43,0.08);
+
+    --cat-sleep: 111,121,201;
+    --cat-meal: 227,162,58;
+    --cat-study: 46,139,126;
+    --cat-rest: 154,143,199;
+    --cat-gym: 221,95,75;
+    --cat-hobby: 193,74,130;
+
+    --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --font-body: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16141E;
+      --card-bg: #201D2B;
+      --text: #F2F0F8;
+      --text-muted: #9D98AC;
+      --line: #322D40;
+      --shadow: rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16141E;
+    --card-bg: #201D2B;
+    --text: #F2F0F8;
+    --text-muted: #9D98AC;
+    --line: #322D40;
+    --shadow: rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 5vw, 40px);
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: clamp(22px, 6vw, 32px);
+    box-shadow: 0 24px 60px -20px var(--shadow);
+  }
+
+  .clock {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(42px, 11vw, 56px);
+    line-height: 1;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .date {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .status {
+    margin-top: 22px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: rgba(var(--cat-now), 0.1);
+    border: 1px solid rgba(var(--cat-now), 0.22);
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+
+  .status-eyebrow {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgb(var(--cat-now));
+    flex-shrink: 0;
+  }
+
+  .status-label {
+    margin-top: 4px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .status-sub {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .progress-track {
+    margin-top: 12px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(var(--cat-now), 0.16);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: rgb(var(--cat-now));
+    width: 0%;
+    transition: width 30s linear, background 0.4s ease;
+  }
+
+  .timeline {
+    margin-top: 26px;
+  }
+
+  .item {
+    display: flex;
+    gap: 14px;
+  }
+
+  .node-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--cat), 0.14);
+    color: rgb(var(--cat));
+    flex-shrink: 0;
+  }
+
+  .icon-wrap svg { width: 17px; height: 17px; }
+
+  .item.active .icon-wrap {
+    background: rgb(var(--cat));
+    color: var(--card-bg);
+    box-shadow: 0 0 0 5px rgba(var(--cat), 0.18);
+  }
+
+  .item.past .icon-wrap {
+    opacity: 0.4;
+    filter: saturate(0.6);
+  }
+
+  .connector {
+    width: 2px;
+    flex: 1;
+    min-height: 22px;
+    background: var(--line);
+    margin: 4px 0;
+  }
+
+  .content {
+    flex: 1;
+    padding-bottom: 22px;
+  }
+
+  .item:last-child .content { padding-bottom: 0; }
+
+  .time-range {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .label-row {
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .label {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .item.past .label, .item.past .time-range { opacity: 0.5; }
+
+  .tag {
+    font-size: 10.5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(var(--cat), 0.16);
+    color: rgb(var(--cat));
+    font-weight: 600;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="clock" id="clock">--:--</div>
+  <div class="date" id="date">carregando...</div>
+
+  <div class="status" id="status">
+    <div class="status-eyebrow"><span class="status-dot" id="statusDot"></span><span id="statusEyebrow">Agora</span></div>
+    <div class="status-label" id="statusLabel">—</div>
+    <div class="status-sub" id="statusSub">—</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<script>
+  const icons = {
+    coffee: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13a3 3 0 0 1 0 6h-1"/><path d="M4 8v7a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4V8"/><path d="M8 2.5c-.6 1 .5 1.5-.1 2.8M12.5 2.5c-.6 1 .5 1.5-.1 2.8"/></svg>',
+    book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.2C4 4.5 4.6 4 5.3 4H12v16H5.3A1.3 1.3 0 0 1 4 18.7z"/><path d="M20 5.2c0-.7-.6-1.2-1.3-1.2H12v16h6.7c.7 0 1.3-.5 1.3-1.3z"/></svg>',
+    utensils: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v6.8a1.7 1.7 0 0 0 1.7 1.7v10"/><path d="M5 2.5v5.6M9 2.5v5.6"/><path d="M17.5 2.5c-1.7 0-3 1.9-3 4.3v3.4c0 1.1.9 2 2 2v9"/></svg>',
+    leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4.2C10.6 4.2 4.4 10 4.4 18c8.4 0 14.6-5.8 14.6-13.8z"/><path d="M4.6 19.4c4-4.2 8-8.4 14.6-14.6"/></svg>',
+    dumbbell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12h2.3M19.2 12h2.3M5.8 8.6v6.8M18.2 8.6v6.8M4 9.6v4.8M20 9.6v4.8M6.6 12h10.8"/></svg>',
+    palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2a8.8 8.8 0 1 0 0 17.6c1.1 0 1.9-.9 1.9-1.9 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.7 1.7-1.7h1.6a3.9 3.9 0 0 0 3.9-3.9c0-4.3-3.9-7.5-8.1-7.5z"/><circle cx="7.6" cy="10.6" r="0.9" fill="currentColor" stroke="none"/><circle cx="10.5" cy="7.7" r="0.9" fill="currentColor" stroke="none"/><circle cx="14.3" cy="7.7" r="0.9" fill="currentColor" stroke="none"/><circle cx="16.7" cy="10.6" r="0.9" fill="currentColor" stroke="none"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 14.8A8.7 8.7 0 1 1 9.3 4a7.2 7.2 0 0 0 10.9 10.8z"/></svg>'
+  };
+
+  const categories = {
+    sleep: '111,121,201',
+    meal:  '227,162,58',
+    study: '46,139,126',
+    rest:  '154,143,199',
+    gym:   '221,95,75',
+    hobby: '193,74,130'
+  };
+
+  // horários em minutos desde 00:00
+  const schedule = [
+    { start: 6*60,  end: 7*60,   label: 'Acorda + café da manhã', cat: 'meal',  icon: 'coffee'   },
+    { start: 7*60,  end: 13*60,  label: 'Estudo',                 cat: 'study', icon: 'book'     },
+    { start: 13*60, end: 14*60,  label: 'Almoço',                 cat: 'meal',  icon: 'utensils' },
+    { start: 14*60, end: 16*60,  label: 'Estudo (Questões)',      cat: 'study', icon: 'book'     },
+    { start: 16*60, end: 17*60,  label: 'Descanso + Lanche',      cat: 'rest',  icon: 'leaf'     },
+    { start: 17*60, end: 19*60,  label: 'Academia',               cat: 'gym',   icon: 'dumbbell' },
+    { start: 19*60, end: 22*60,  label: 'Hobby + janta',          cat: 'hobby', icon: 'palette'  },
+    { start: 22*60, end: 30*60,  label: 'Dormir',                 cat: 'sleep', icon: 'moon'     } // 22:00–06:00 (dia seguinte)
+  ];
+
+  const weekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  const months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+  function pad(n) { return n.toString().padStart(2, '0'); }
+
+  function fmt(mins) {
+    mins = ((mins % 1440) + 1440) % 1440;
+    return pad(Math.floor(mins / 60)) + ':' + pad(mins % 60);
+  }
+
+  function fmtDuration(mins) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h <= 0) return m + 'min';
+    if (m === 0) return h + 'h';
+    return h + 'h ' + m + 'min';
+  }
+
+  function buildTimeline() {
+    const el = document.getElementById('timeline');
+    el.innerHTML = schedule.map((item, i) => {
+      const isLast = i === schedule.length - 1;
+      return `
+        <div class="item" data-index="${i}">
+          <div class="node-col">
+            <div class="icon-wrap" style="--cat:${categories[item.cat]}">${icons[item.icon]}</div>
+            ${isLast ? '' : '<div class="connector"></div>'}
+          </div>
+          <div class="content">
+            <div class="time-range">${fmt(item.start)} – ${fmt(item.end % 1440)}</div>
+            <div class="label-row">
+              <span class="label">${item.label}</span>
+              <span class="tag" data-tag style="display:none"></span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function update() {
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+
+    document.getElementById('clock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
+    document.getElementById('date').textContent = weekdays[now.getDay()] + ', ' + now.getDate() + ' de ' + months[now.getMonth()];
+
+    let activeIndex = schedule.findIndex(item => nowMins >= item.start && nowMins < item.end);
+    if (activeIndex === -1) {
+      // cobre o caso do bloco que atravessa a meia-noite (Dormir), quando "agora" já é madrugada
+      activeIndex = schedule.findIndex(item => nowMins + 1440 >= item.start && nowMins + 1440 < item.end);
+    }
+
+    const items = document.querySelectorAll('.item');
+    items.forEach((el, i) => {
+      el.classList.remove('active', 'past');
+      const tag = el.querySelector('[data-tag]');
+      tag.style.display = 'none';
+      const item = schedule[i];
+      if (i === activeIndex) {
+        el.classList.add('active');
+        tag.textContent = 'agora';
+        tag.style.display = 'inline-block';
+      } else if (item.end <= nowMins && i !== schedule.length - 1) {
+        el.classList.add('past');
+      } else if (activeIndex !== -1 && i === (activeIndex + 1) % schedule.length) {
+        tag.textContent = 'a seguir';
+        tag.style.display = 'inline-block';
+      }
+    });
+
+    if (activeIndex !== -1) {
+      const active = schedule[activeIndex];
+      const cat = categories[active.cat];
+      const elapsed = Math.min(1, Math.max(0, (nowMins >= active.start ? nowMins - active.start : nowMins + 1440 - active.start) / (active.end - active.start)));
+      const remaining = Math.round((active.end - (nowMins < active.start ? nowMins + 1440 : nowMins)) );
+
+      document.getElementById('status').style.setProperty('--cat-now', cat);
+      document.getElementById('statusLabel').textContent = active.label;
+      document.getElementById('statusSub').textContent = 'até às ' + fmt(active.end % 1440) + ' (faltam ' + fmtDuration(Math.max(remaining,1)) + ')';
+      document.getElementById('progressFill').style.width = (elapsed * 100).toFixed(1) + '%';
+    }
+  }
+
+  buildTimeline();
+  update();
+  setInterval(update, 30000);
+</script>
+
+</body>
+</html>
